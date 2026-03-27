@@ -44,4 +44,11 @@ const loginService = async (email, password) => {
   return token;
 };
 
-module.exports = { registerService, loginService };
+const userProfileService = async (userId) => {
+  const response = await Users.findByPk(userId);
+
+  if(!response) throw appError("user not found", 400);
+
+  return response;
+}
+module.exports = { registerService, loginService, userProfileService };

@@ -1,4 +1,4 @@
-const { loginService, registerService } = require("../services/userServices");
+const { loginService, registerService, userProfileService } = require("../services/userServices");
 const appError = require("../utils/appError");
 
 const register = async (req, res) => {
@@ -22,4 +22,14 @@ const login = async (req, res) => {
   res.status(200).json({ msg: "user successfully logged in", data: response });
 };
 
-module.exports = { register, login };
+const getUserProfile = async (req, res) => {
+  const userId = req.userId;
+
+  const response = await userProfileService(userId);
+
+  res
+    .status(200)
+    .json({ msg: "user profile successfully fetched", data: response });
+};
+
+module.exports = { register, login, getUserProfile };

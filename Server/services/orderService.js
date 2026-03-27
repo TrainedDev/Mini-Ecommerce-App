@@ -1,5 +1,6 @@
 const {
   mini_e_commerce_orders: Orders,
+  mini_e_commerce_users: Users,
   mini_e_commerce_order_items: OrderItems,
   sequelize,
 } = require("../models");
@@ -57,7 +58,7 @@ const createOrderService = async (
 };
 
 const updateOrderService = async (status, address, orderId, totalPrice) => {
-  const getOrder = Orders.findByPk(orderId);
+  const getOrder = await Orders.findByPk(orderId);
 
   if (!getOrder) throw appError("order not found", 401);
 
@@ -74,13 +75,17 @@ const updateOrderService = async (status, address, orderId, totalPrice) => {
 const fetchUsersOrdersService = async (userId) => {
   const fetchOrders = await Users.findOne({
     where: { id: userId },
-    include: {
-      model: "Orders",
-      include: {
-        model: "OrderItems",
-        as: "items",
+    include: [
+      {
+        model: Orders,
+        include: [
+          {
+            model: OrderItems,
+            as: "items",
+          },
+        ],
       },
-    },
+    ],
   });
 
   return fetchOrders;
