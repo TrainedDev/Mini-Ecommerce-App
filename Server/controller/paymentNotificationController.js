@@ -1,13 +1,20 @@
+const { verifyPaymentService } = require("../services/paymentNotificationService");
 const appError = require("../utils/appError");
 
-const createPayment = async (req, res) => {
-  const { orderId } = req.params;
+const verifyPayment = async (req, res) => {
+  const { razorpay_order_id, razorpay_payment_id, razorpay_signature } =
+    req.params;
 
-  if (!orderId) throw appError("required details not found", 400);
+  if (!razorpay_order_id || !razorpay_payment_id || !razorpay_signature)
+    throw appError("required verification details not found", 400);
 
-  const response = await createPaymentService(orderId);
+  const response = await verifyPaymentService(
+    razorpay_order_id,
+    razorpay_payment_id,
+    razorpay_signature,
+  );
 
   res.status(200).json({ msg: "payment successfully done", data: response });
 };
 
-module.exports = { createPayment }
+module.exports = { verifyPayment };

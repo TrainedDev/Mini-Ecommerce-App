@@ -17,9 +17,20 @@ module.exports = (sq, datatypes) => {
         type: datatypes.STRING,
         allowNull: false,
       },
-      status: {
-        type: datatypes.ENUM("canceled", "failed", "success"),
+      payment_status: {
+        type: datatypes.ENUM("pending", "canceled", "failed", "paid", "refund"),
+        allowNull: false,
+        defaultValue:"pending",
       },
+      razorpay_order_id:{
+        type:datatypes.STRING,
+      },
+      razorpay_payment_id:{
+        type: datatypes.STRING,
+      },
+      razorpay_signature:{
+        type: datatypes.STRING,
+      }
     },
     {
       tableName: "mini_e_commerce_orders",

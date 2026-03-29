@@ -6,15 +6,17 @@ const {
 const appError = require("../utils/appError");
 
 const createOrder = async (req, res) => {
-  const { totalPrice, status, items, address } = req.body;
+  console.log(req.body);
+  
+  const { totalPrice, payment_status, items, address } = req.body;
   const userId = req.userId;
 
-  if (!totalPrice || !status || !items || !address)
+  if (!totalPrice || !payment_status || !items || !address)
     throw appError("required details not found", 400);
 
   const response = await createOrderService(
     totalPrice,
-    status,
+    payment_status,
     items,
     address,
     userId,
@@ -24,12 +26,12 @@ const createOrder = async (req, res) => {
 };
 
 const updateOrder = async (req, res) => {
-  const { status, address, orderId, totalPrice } = req.body;
+  const { payment_status, address, orderId, totalPrice } = req.body;
 
-  if (!status || !orderId) throw appError("updating fields not found", 400);
+  if (!payment_status || !orderId) throw appError("updating fields not found", 400);
 
   const response = await updateOrderService(
-    status,
+    payment_status,
     address,
     orderId,
     totalPrice,

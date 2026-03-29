@@ -2,16 +2,20 @@ const express = require("express");
 const cors = require("cors");
 const { route: usersRoute } = require("./routes/usersRoute");
 const { route: orderRoutes } = require("./routes/orderRoutes");
+const { route: paymentRoutes } = require("./routes/paymentRoute");
 const { globalErrorHandler } = require("./middleware/handler");
 const { sequelize } = require("./models");
 const { paymentQueue } = require("./queues");
 const app = express();
 
-app.use(cors());
+app.use(cors({
+  origin:"http://localhost:5173"
+}));
 app.use(express.json());
 
 app.use("/auth", usersRoute);
 app.use("/orders", orderRoutes);
+app.use("/payment", paymentRoutes);
 app.use(globalErrorHandler);
 
 app.get("/check", async (req, res) => {

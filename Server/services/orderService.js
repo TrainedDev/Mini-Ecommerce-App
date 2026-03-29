@@ -1,3 +1,4 @@
+const { razorpayInstance } = require("../config/razorpayInstance");
 const {
   mini_e_commerce_orders: Orders,
   mini_e_commerce_users: Users,
@@ -10,14 +11,21 @@ const appError = require("../utils/appError");
 
 const createOrderService = async (
   totalPrice,
-  status,
+  payment_payment_status,
   items,
   address,
   userId,
 ) => {
   const response = await sequelize.transaction(async (t) => {
+
+    const { id } = await razorpayInstance.orders.create({
+      amount: totalPrice * 100,
+      currency:"INR",
+      receipt: `rcpt_${Date.now()}`,
+    });
+
     const newOrder = await Orders.create(
-      { totalPrice, status, address, userId },
+      { totalPrice, payment_payment_status, address, userId, razorpay_order_id: id },
       { transaction: t },
     );
 
@@ -37,27 +45,27 @@ const createOrderService = async (
     return newOrder;
   });
 
-  await paymentQueue.add(
-    "process_user_payment",
-    { orderId: response.id },
-    {
-      attempts: 3,
-      backoff: {
-        type: "exponential",
-        delay: 2000,
-      },
-      removeOnComplete: {
-        age: 3600,
-        count: 1000,
-      },
-      removeOnFail: false,
-    },
-  );
+  // await paymentQueue.add(
+  //   "process_user_payment",
+  //   { orderId: response.id },
+  //   {
+  //     attempts: 3,
+  //     backoff: {
+  //       type: "exponential",
+  //       delay: 2000,
+  //     },
+  //     removeOnComplete: {
+  //       age: 3600,
+  //       count: 1000,
+  //     },
+  //     removeOnFail: false,
+  //   },
+  // );
 
   return response;
 };
 
-const updateOrderService = async (status, address, orderId, totalPrice) => {
+const updateOrderService = async (payment_status, address, orderId, totalPrice) => {
   const getOrder = await Orders.findByPk(orderId);
 
   if (!getOrder) throw appError("order not found", 401);
@@ -65,7 +73,7 @@ const updateOrderService = async (status, address, orderId, totalPrice) => {
   if (address !== undefined) getOrder.address = address;
   if (totalPrice !== undefined) getOrder.totalPrice = totalPrice;
 
-  getOrder.status = status;
+  getOrder.payment_status = payment_status;
 
   await getOrder.save();
 

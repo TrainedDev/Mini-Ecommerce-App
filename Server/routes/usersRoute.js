@@ -11,6 +11,6 @@ const route = Router();
 
 route.post("/register", asyncHandler(register));
 route.post("/login", asyncHandler(login));
-route.post("/profile", authVerify, asyncHandler(getUserProfile));
+route.get("/profile", authVerify, asyncHandler(getUserProfile));
 
 module.exports = { route };
