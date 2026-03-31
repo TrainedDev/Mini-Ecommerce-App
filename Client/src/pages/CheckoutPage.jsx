@@ -2,7 +2,7 @@ import { useRazorpay } from "@/Razorpay/useRazorpay";
 import { UserContext } from "@/State Management/Contexts/NewContexts";
 import axios from "axios";
 import { useState, useCallback, useEffect, useContext } from "react";
-import { useParams } from "react-router";
+import { useNavigate, useParams } from "react-router";
 
 const INITIAL_ITEMS = [
   // {
@@ -422,17 +422,18 @@ function CheckoutPage() {
   const api = import.meta.env.VITE_SERVER_URL;
   const { id: productId } = useParams();
   const [items, setItems] = useState(INITIAL_ITEMS);
+  const navigate = useNavigate();
   const [defaultUserData, setDefaultUserData] = useState({
     firstName: "",
     email: "",
   });
   const [form, setForm] = useState({
     lastName: "",
-    phone: "1234567890",
-    address: "dasdasdsad",
+    phone: "",
+    address: "",
     city: "Surat",
     state: "Gujarat",
-    pin: "213123",
+    pin: "",
   });
   // const [data, setData] = useState(null);
   const [errors, setErrors] = useState({});
@@ -471,17 +472,17 @@ function CheckoutPage() {
 
   const validate = useCallback(() => {
     const e = {};
-    // if (!form.firstName.trim()) e.firstName = "Required";
-    // if (!form.email.trim()) e.email = "Required";
-    // else if (!/\S+@\S+\.\S+/.test(form.email)) e.email = "Invalid email";
-    // if (!form.phone.trim()) e.phone = "Required";
-    // else if (!/^\d{10}$/.test(form.phone)) e.phone = "Must be 10 digits";
+    if (!defaultUserData.firstName.trim()) e.firstName = "Required";
+    if (!defaultUserData.email.trim()) e.email = "Required";
+    else if (!/\S+@\S+\.\S+/.test(defaultUserData.email)) e.email = "Invalid email";
+    if (!form.phone.trim()) e.phone = "Required";
+    else if (!/^\d{10}$/.test(form.phone)) e.phone = "Must be 10 digits";
     if (!form.address.trim()) e.address = "Required";
     if (!form.pin.trim()) e.pin = "Required";
     else if (!/^\d{6}$/.test(form.pin)) e.pin = "6-digit PIN";
     setErrors(e);
     return Object.keys(e).length === 0;
-  }, [form]);
+  }, [form, defaultUserData]);
 
   const applyCoupon = () => {
     if (discount.code) return;
@@ -541,9 +542,15 @@ function CheckoutPage() {
     const fetchProduct = async () => {
       try {
         const response = await axios.get(
-          `https://fakestoreapi.com/products/${productId}`,
+          `https://dummyjson.com/c/2a32-77c6-46e5-a930`,
         );
-        const { id, title: name, image: emoji, price } = response.data;
+        const productDetails = response.data.products.filter(
+          (ele) => ele.id == productId,
+        );
+
+        const { id, title: name, thumbnail: emoji, price } = productDetails[0];
+        // console.log("data:", id, name, emoji, price);
+
         setItems((prev) => {
           if (prev.find((ele) => ele.id === id)) return prev;
           return [
@@ -561,29 +568,42 @@ function CheckoutPage() {
   useEffect(() => {
     const fetchUserData = async () => {
       try {
+        // console.log(user?.data, "running from fetchuser");
         
         const response = await axios.get(`${api}/auth/profile`, {
           headers: {
             Authorization: `Bearer ${user.data}`,
           },
         });
+        console.log(response);
+
         const { username: firstName, email } = response.data.data;
         setDefaultUserData({
           firstName,
           email,
         });
       } catch (error) {
-        setErrors(error?.response?.data.error);
-        console.log(error?.response?.data.error);
+        setErrors(error?.response?.data?.error);
+        console.log(error?.response?.data?.error || error);
+        if (error?.response?.data?.error == "jwt expired") {
+          localStorage.removeItem("token");
+          alert("your session has expired");
+          navigate("/");
+        }
       }
     };
     fetchUserData();
-  }, [form, api, user]);
+  }, [ user.data, api, navigate]);
 
   const { pay } = useRazorpay();
 
   const handlePay = async () => {
-    if (!validate()) return; // Bug 2 fixed — actually stops here
+    console.log("am i inside", errors);
+
+    if (!validate()) {
+      alert("validation failed");
+      return;
+    } // Bug 2 fixed — actually stops here
     if (items.length === 0) return;
     setLoading(true);
 
@@ -607,23 +627,20 @@ function CheckoutPage() {
       const response = await axios.post(`${api}/orders/create`, orderDetails, {
         headers: { Authorization: `Bearer ${user.data}` },
       });
-console.log(response.data.data);
 
       const {
-        id,
         totalPrice,
         razorpay_order_id,
         address: userAddress,
       } = response.data.data;
 
       await pay({
-        id,
+        razorpay_order_id,
         username,
         email,
         phone: form.phone, // use form.phone not hardcoded number
         userAddress,
         totalPrice,
-        razorpay_order_id,
         setToast: (msg) => setToast({ show: true, msg }),
         setErrors: (msg) => setErrors((e) => ({ ...e, pay: msg })),
       });
@@ -637,6 +654,7 @@ console.log(response.data.data);
       setLoading(false); // always runs — even if pay() throws
     }
   };
+
   const stateJson = JSON.stringify(buildState(), null, 2);
 
   return (
@@ -706,34 +724,36 @@ console.log(response.data.data);
                   />
                 </div>
 
-                {/* <div className="co-field">
+                <div className="co-field">
                   <label className="co-label">Phone number</label>
                   <input
-                    className={`co-input${errors.phone ? " err" : ""}`}
+                    className={`co-input${errors && errors.phone ? " err" : ""}`}
                     type="tel"
                     value={form?.phone}
                     placeholder="9876543210"
                     maxLength={10}
                     onChange={(e) => setField("phone", e.target.value)}
                   />
-                  {errors.phone && <div className="co-err">{errors.phone}</div>}
-                </div> */}
+                  {errors && errors.phone && (
+                    <div className="co-err">{errors && errors?.phone}</div>
+                  )}
+                </div>
 
-                {/* <div className="co-field">
+                <div className="co-field">
                   <label className="co-label">Street address</label>
                   <input
-                    className={`co-input${errors.address ? " err" : ""}`}
+                    className={`co-input${errors && errors.address ? " err" : ""}`}
                     value={form?.address}
                     placeholder="12, MG Road, Near City Mall"
                     onChange={(e) => setField("address", e.target.value)}
                   />
-                  {errors.address && (
-                    <div className="co-err">{errors.address}</div>
+                  {errors && errors.address && (
+                    <div className="co-err">{errors && errors.address}</div>
                   )}
-                </div> */}
+                </div>
 
                 <div className="co-row-3">
-                  {/* <div className="co-field">
+                  <div className="co-field">
                     <label className="co-label">City</label>
                     <input
                       className="co-input"
@@ -753,18 +773,20 @@ console.log(response.data.data);
                         <option key={s}>{s}</option>
                       ))}
                     </select>
-                  </div> */}
-                  {/* <div className="co-field">
+                  </div>
+                  <div className="co-field">
                     <label className="co-label">PIN code</label>
                     <input
-                      className={`co-input${errors.pin ? " err" : ""}`}
+                      className={`co-input${errors && errors.pin ? " err" : ""}`}
                       value={form?.pin}
                       placeholder="395001"
                       maxLength={6}
                       onChange={(e) => setField("pin", e.target.value)}
                     />
-                    {errors.pin && <div className="co-err">{errors.pin}</div>}
-                  </div> */}
+                    {errors && errors.pin && (
+                      <div className="co-err">{errors && errors.pin}</div>
+                    )}
+                  </div>
                 </div>
               </div>
 

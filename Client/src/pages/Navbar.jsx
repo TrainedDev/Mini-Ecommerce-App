@@ -28,9 +28,15 @@ function classNames(...classes) {
 }
 
 export default function Navbar() {
-  const { user } = useContext(UserContext);
+  const { setAuthUser, authUser } = useContext(UserContext);
   const { setBoolVal } = useContext(BooleanContext);
 
+  const signOut = () => {
+    localStorage.removeItem("token");
+    setAuthUser((prev) => ({ ...prev, authUser: false }));
+    window.location.reload();
+    alert("Successfully logged Out")
+  };
   return (
     <Disclosure
       as="nav"
@@ -92,8 +98,8 @@ export default function Navbar() {
             </button>
             <ToggleUI />
             {/* Profile dropdown */}
-            {user ? (
-              <Menu as="div" className="relative ml-3">
+            {authUser ? (
+              <Menu as="div" className={`relative ml-3`}>
                 <MenuButton className="relative flex rounded-full focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500">
                   <span className="absolute -inset-1.5" />
                   <span className="sr-only">Open user menu</span>
@@ -128,7 +134,7 @@ export default function Navbar() {
                     <p
                       href="#"
                       className="block px-4 py-2 text-sm text-gray-300 data-focus:bg-white/5 data-focus:outline-hidden"
-                      onClick={() => localStorage.removeItem("token")}
+                      onClick={signOut}
                     >
                       Sign out
                     </p>

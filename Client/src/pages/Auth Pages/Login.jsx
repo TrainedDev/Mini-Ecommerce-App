@@ -20,7 +20,7 @@ import { useContext, useState } from "react";
 function Login() {
   const [data, setData] = useState({ email: "", password: "" });
   const { boolVal, setBoolVal } = useContext(BooleanContext);
-  const { setUser } = useContext(UserContext);
+  const { setUser, setAuthUser } = useContext(UserContext);
   const api = import.meta.env.VITE_SERVER_URL;
   // console.log("i am here", data);
 
@@ -37,6 +37,8 @@ function Login() {
       );
       setBoolVal((prev) => ({ ...prev, authCard: false }));
       setUser(token);
+      setAuthUser(prev => ({ ...prev, authUser: true }))
+      setBoolVal((prev) => ({ ...prev, authCard: false }));
     } catch (error) {
       console.error(error);
     }

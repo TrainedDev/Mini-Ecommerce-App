@@ -11,6 +11,7 @@ const verifyPaymentService = async (
   razorpay_order_id,
   razorpay_payment_id,
   razorpay_signature,
+  userId
 ) => {
   const expectSignature = crypto
     .createHmac("sha256", RAZORPAY_TEST_SECRET_KEY)
@@ -35,7 +36,7 @@ const verifyPaymentService = async (
 
   await notificationQueue.add(
     "notify_user_payment",
-    { orderId },
+    { userId },
     {
       attempts: 3,
       backoff: {
@@ -49,6 +50,8 @@ const verifyPaymentService = async (
       removeOnFail: false,
     },
   );
+  console.log(fetchOrder);
+  
   return fetchOrder;
 };
 

@@ -6,9 +6,11 @@ import { useContext, useEffect, useState } from "react";
 import {
   BooleanContext,
   ThemeContext,
+  UserContext,
 } from "@/State Management/Contexts/NewContexts";
 import axios from "axios";
 import { Link } from "react-router";
+import ErrorCard from "./ErrorCard";
 
 // const products = [
 //   {
@@ -57,13 +59,23 @@ import { Link } from "react-router";
 export default function Home({ theme }) {
   const [products, setProducts] = useState(null);
   const { boolVal, setBoolVal } = useContext(BooleanContext);
+  const { authUser } = useContext(UserContext);
   useEffect(() => {
     const fetchProducts = async () => {
-      const response = await axios.get("https://fakestoreapi.com/products");
-      setProducts(response.data);
+      // const response = await axios.get("https://fakestoreapi.com/products");
+      const response = await axios.get(
+        "https://dummyjson.com/c/2a32-77c6-46e5-a930",
+      );
+      setProducts(response.data.products);
     };
     fetchProducts();
   }, [products]);
+
+  const checkUser = () => {
+    if (authUser) return;
+    if (!authUser) alert("kindly authenticate yourself");
+    setBoolVal((prev) => ({ ...prev, authCard: true }));
+  };
 
   return (
     <div className={`relative ${!theme ? "bg-white" : "bg-black"}`}>
@@ -87,37 +99,43 @@ export default function Home({ theme }) {
         </h2>
 
         <div className="mt-6 grid grid-cols-1 gap-x-6 gap-y-10 sm:grid-cols-2 lg:grid-cols-4 xl:gap-x-8">
-          {products?.map((product) => (
-            <Link
-              to={`/product/${product.id}`}
-              key={product.id}
-              className="group relative"
-            >
-              <img
-                alt={product.category}
-                src={product.image}
-                className="aspect-square w-full rounded-md bg-gray-200 object-cover group-hover:opacity-75 lg:aspect-auto lg:h-80"
-              />
-              <div
-                className={`mt-4 flex justify-between ${!theme ? "text-gray-700" : "text-white"}`}
+          {products ? (
+            products?.map((product) => (
+              <Link
+                to={authUser ? `/product/${product.id}` : ""}
+                key={product.id}
+                onClick={checkUser}
+                className="group relative"
               >
-                <div>
-                  <h3 className="text-sm mr-2 text-start">
-                    {/* <a href={product.href}> */}
+                <img
+                  alt={`${product.title} image`}
+                  src={product.images[0]}
+                  onClick={() => checkUser}
+                  className="aspect-square w-full rounded-md bg-gray-200 object-cover group-hover:opacity-75 lg:aspect-auto lg:h-80"
+                />
+                <div
+                  className={`mt-4 flex justify-between ${!theme ? "text-gray-700" : "text-white"}`}
+                >
+                  <div>
+                    <h3 className="text-sm mr-2 text-start">
+                      {/* <a href={product.href}> */}
                       <span aria-hidden="true" className="absolute inset-0" />
                       {product.title}
-                    {/* </a> */}
-                  </h3>
-                  <p className="mt-1 text-sm">{product.rating.rate}</p>
+                      {/* </a> */}
+                    </h3>
+                    {/* <p className="mt-1 text-sm">{product.rating.rate}</p> */}
+                  </div>
+                  <p
+                    className={`text-sm font-medium ${!theme ? "text-gray-900" : "text-white"}`}
+                  >
+                    {product.price}
+                  </p>
                 </div>
-                <p
-                  className={`text-sm font-medium ${!theme ? "text-gray-900" : "text-white"}`}
-                >
-                  {product.price}
-                </p>
-              </div>
-            </Link>
-          ))}
+              </Link>
+            ))
+          ) : (
+            <ErrorCard />
+          )}
         </div>
       </div>
     </div>
