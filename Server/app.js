@@ -6,10 +6,17 @@ const { route: paymentRoutes } = require("./routes/paymentRoute");
 const { globalErrorHandler } = require("./middleware/handler");
 const { sequelize } = require("./models");
 const { paymentQueue } = require("./queues");
+const {config} = require("dotenv");
+
 const app = express();
 
+config();
+
+const { CLIENT_URL } = process.env;
+
 app.use(cors({
-  origin:"http://localhost:5173"
+  // origin:"http://localhost:5173"
+  origin: CLIENT_URL,
 }));
 app.use(express.json());
 
