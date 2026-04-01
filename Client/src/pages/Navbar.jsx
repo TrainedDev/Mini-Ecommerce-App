@@ -15,12 +15,13 @@ import {
 import { Bars3Icon, BellIcon, XMarkIcon } from "@heroicons/react/24/outline";
 import { LogIn } from "lucide-react";
 import { useContext } from "react";
+import { Link, useNavigate } from "react-router";
 
 const navigation = [
   { name: "Dashboard", href: "/", current: true },
-  { name: "Team", href: "#", current: false },
-  { name: "Projects", href: "#", current: false },
-  { name: "Calendar", href: "#", current: false },
+  { name: "Team", href: "/", current: false },
+  { name: "Projects", href: "/", current: false },
+  { name: "Calendar", href: "/", current: false },
 ];
 
 function classNames(...classes) {
@@ -28,19 +29,23 @@ function classNames(...classes) {
 }
 
 export default function Navbar() {
-  const { setAuthUser, authUser } = useContext(UserContext);
+  const { setAuthUser, authUser, user } = useContext(UserContext);
   const { setBoolVal } = useContext(BooleanContext);
+  const navigate = useNavigate();
 
   const signOut = () => {
     localStorage.removeItem("token");
+    // setUser(undefined)
     setAuthUser((prev) => ({ ...prev, authUser: false }));
+    navigate("/");
+    alert("Successfully logged Out");
     window.location.reload();
-    alert("Successfully logged Out")
   };
+  
   return (
     <Disclosure
       as="nav"
-      className="relative bg-gray-800/50 after:pointer-events-none after:absolute after:inset-x-0 after:bottom-0 after:h-px after:bg-white/10"
+      className="relative bg-gray-800 after:pointer-events-none after:absolute after:inset-x-0 after:bottom-0 after:h-px after:bg-white/10"
     >
       <div className="mx-auto max-w-7xl px-2 sm:px-6 lg:px-8">
         <div className="relative flex h-16 items-center justify-between">
@@ -70,7 +75,7 @@ export default function Navbar() {
             <div className="hidden sm:ml-6 sm:block">
               <div className="flex space-x-4">
                 {navigation.map((item) => (
-                  <a
+               <p
                     key={item.name}
                     href={item.href}
                     aria-current={item.current ? "page" : undefined}
@@ -82,7 +87,7 @@ export default function Navbar() {
                     )}
                   >
                     {item.name}
-                  </a>
+                  </p>
                 ))}
               </div>
             </div>
@@ -98,7 +103,7 @@ export default function Navbar() {
             </button>
             <ToggleUI />
             {/* Profile dropdown */}
-            {authUser ? (
+            {authUser || user ? (
               <Menu as="div" className={`relative ml-3`}>
                 <MenuButton className="relative flex rounded-full focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500">
                   <span className="absolute -inset-1.5" />
@@ -115,24 +120,23 @@ export default function Navbar() {
                   className="absolute right-0 z-10 mt-2 w-48 origin-top-right rounded-md bg-gray-800 py-1 outline -outline-offset-1 outline-white/10 transition data-closed:scale-95 data-closed:transform data-closed:opacity-0 data-enter:duration-100 data-enter:ease-out data-leave:duration-75 data-leave:ease-in"
                 >
                   <MenuItem>
-                    <a
-                      href="#"
+                 <p
+                      
                       className="block px-4 py-2 text-sm text-gray-300 data-focus:bg-white/5 data-focus:outline-hidden"
                     >
                       Your profile
-                    </a>
+                    </p>
                   </MenuItem>
                   <MenuItem>
-                    <a
-                      href="#"
+                 <p
+                      
                       className="block px-4 py-2 text-sm text-gray-300 data-focus:bg-white/5 data-focus:outline-hidden"
                     >
                       Settings
-                    </a>
+                    </p>
                   </MenuItem>
                   <MenuItem>
                     <p
-                      href="#"
                       className="block px-4 py-2 text-sm text-gray-300 data-focus:bg-white/5 data-focus:outline-hidden"
                       onClick={signOut}
                     >
@@ -158,8 +162,8 @@ export default function Navbar() {
           {navigation.map((item) => (
             <DisclosureButton
               key={item.name}
-              as="a"
-              href={item.href}
+              as={Link}
+              to={item.href}
               aria-current={item.current ? "page" : undefined}
               className={classNames(
                 item.current

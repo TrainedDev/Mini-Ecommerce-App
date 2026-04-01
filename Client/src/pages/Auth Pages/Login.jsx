@@ -17,25 +17,26 @@ import {
 import axios from "axios";
 import { useContext, useState } from "react";
 
-function Login() {
+function Login({theme}) {
   const [data, setData] = useState({ email: "", password: "" });
   const { boolVal, setBoolVal } = useContext(BooleanContext);
   const { setUser, setAuthUser } = useContext(UserContext);
   const api = import.meta.env.VITE_SERVER_URL;
-  // console.log("i am here", data);
+  
 
   const handleSubmit = async (e) => {
     try {
+      
       e.preventDefault();
 
       const response = await axios.post(`${api}/auth/login`, data);
-      console.log(response.data, "triggred");
 
-      const token = localStorage.setItem(
-        "token",
-        JSON.stringify(response.data),
+      const token = response.data.data;
+      
+       localStorage.setItem(
+        "token", token,
       );
-      setBoolVal((prev) => ({ ...prev, authCard: false }));
+      
       setUser(token);
       setAuthUser(prev => ({ ...prev, authUser: true }))
       setBoolVal((prev) => ({ ...prev, authCard: false }));
@@ -43,13 +44,15 @@ function Login() {
       console.error(error);
     }
   };
+  // console.log(boolVal.registerCard);
+  
   return (
     <Card
-      className={`w-full max-w-md h-[60vh] flex flex-col justify-evenly bg-black/15 ${boolVal.registerCard ? "hidden" : "visible"}`}
+      className={`w-full max-w-md h-[60vh] flex flex-col justify-evenly ${theme ? "bg-white/40": "bg-black/40"}  ${boolVal.registerCard ? "hidden" : "visible"} text-white`}
     >
-      <CardHeader>
-        <CardTitle>Login to your account</CardTitle>
-        <CardDescription>
+      <CardHeader >
+        <CardTitle className={`${theme ?"text-black": "text-white"}`}>Login to your account</CardTitle>
+        <CardDescription className={`${theme ?"text-black/90": "text-white/90"}`}>
           Enter your email below to login to your account
         </CardDescription>
         <CardAction>
@@ -64,15 +67,16 @@ function Login() {
           </Button>
         </CardAction>
       </CardHeader>
-      <CardContent>
+      <CardContent className={`${theme ?"text-black/90": "text-white/90"}`}>
         <form onSubmit={handleSubmit}>
-          <div className="flex flex-col gap-6">
+          <div className="flex flex-col gap-6 mb-10">
             <div className="grid gap-2">
               <Label htmlFor="email">Email</Label>
               <Input
                 id="email-login"
                 type="email"
                 value={data.email}
+                className={`${theme ?"border-black": "border-white"}`}
                 onChange={(e) =>
                   setData((prev) => ({ ...prev, email: e.target.value }))
                 }
@@ -90,6 +94,7 @@ function Login() {
               <Input
                 id="password-login"
                 type="password"
+                className={`${theme ?"border-black": "border-white"}`}
                 value={data.password}
                 onChange={(e) =>
                   setData((prev) => ({ ...prev, password: e.target.value }))
@@ -98,11 +103,9 @@ function Login() {
               />
             </div>
           </div>
-          <CardFooter className="flex-col gap-2">
             <Button type="submit" className="w-full cursor-pointer">
               Login
             </Button>
-          </CardFooter>
         </form>
       </CardContent>
     </Card>

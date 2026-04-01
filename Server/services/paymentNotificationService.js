@@ -50,8 +50,6 @@ const verifyPaymentService = async (
       removeOnFail: false,
     },
   );
-  console.log(fetchOrder);
-  
   return fetchOrder;
 };
 

@@ -63,7 +63,7 @@ function classNames(...classes) {
 }
 
 
-export default function Example() {
+export default function Example({theme}) {
   const { id } = useParams();
    const [product, setProduct] = useState(null);
    // const { theme } = useContext(ThemeContext);
@@ -96,7 +96,7 @@ export default function Example() {
      fetchProduct();
    }, [id]);
   return (
-    <div className="bg-white">
+    <div className={`${!theme ? "bg-white" : "bg-black"}`}>
       {product? (
       <div className="pt-6">
         {/* <nav aria-label="Breadcrumb">

@@ -73,7 +73,7 @@ const fmt = (n) => "₹" + Math.round(n).toLocaleString("en-IN");
 const STYLES = `
   @import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap');
 
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  *, *::before, *::after { box-sizing: border-box; }
 
   :root {
     --ink: #1a1208;
@@ -474,7 +474,8 @@ function CheckoutPage() {
     const e = {};
     if (!defaultUserData.firstName.trim()) e.firstName = "Required";
     if (!defaultUserData.email.trim()) e.email = "Required";
-    else if (!/\S+@\S+\.\S+/.test(defaultUserData.email)) e.email = "Invalid email";
+    else if (!/\S+@\S+\.\S+/.test(defaultUserData.email))
+      e.email = "Invalid email";
     if (!form.phone.trim()) e.phone = "Required";
     else if (!/^\d{10}$/.test(form.phone)) e.phone = "Must be 10 digits";
     if (!form.address.trim()) e.address = "Required";
@@ -566,18 +567,18 @@ function CheckoutPage() {
   }, [productId]);
 
   useEffect(() => {
+    if (!user) return;
+
     const fetchUserData = async () => {
       try {
-        // console.log(user?.data, "running from fetchuser");
-        
         const response = await axios.get(`${api}/auth/profile`, {
           headers: {
-            Authorization: `Bearer ${user.data}`,
+            Authorization: `Bearer ${user}`,
           },
         });
-        console.log(response);
 
         const { username: firstName, email } = response.data.data;
+
         setDefaultUserData({
           firstName,
           email,
@@ -585,21 +586,20 @@ function CheckoutPage() {
       } catch (error) {
         setErrors(error?.response?.data?.error);
         console.log(error?.response?.data?.error || error);
-        if (error?.response?.data?.error == "jwt expired") {
+
+        if (error?.response?.data?.error === "jwt expired") {
           localStorage.removeItem("token");
           alert("your session has expired");
           navigate("/");
         }
       }
     };
-    fetchUserData();
-  }, [ user.data, api, navigate]);
 
+    fetchUserData();
+  }, [user, api, navigate, defaultUserData]);
   const { pay } = useRazorpay();
 
   const handlePay = async () => {
-    console.log("am i inside", errors);
-
     if (!validate()) {
       alert("validation failed");
       return;
@@ -662,7 +662,7 @@ function CheckoutPage() {
       <style>{STYLES}</style>
       <div className="co-page">
         {/* ── Header ── */}
-        <header className="co-header">
+        {/* <header className="co-header">
           <div className="co-brand">
             Shop<em>Easy</em>
           </div>
@@ -682,7 +682,7 @@ function CheckoutPage() {
               <span>Confirm</span>
             </div>
           </div>
-        </header>
+        </header> */}
 
         <div className="co-container">
           <div className="co-grid">

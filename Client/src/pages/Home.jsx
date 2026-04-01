@@ -1,16 +1,14 @@
-import { Cross, X } from "lucide-react";
+import {  X } from "lucide-react";
 import Login from "./Auth Pages/Login";
-import { Button } from "@/components/ui/button";
-import Register from "./Auth Pages/Register";
 import { useContext, useEffect, useState } from "react";
 import {
   BooleanContext,
-  ThemeContext,
   UserContext,
 } from "@/State Management/Contexts/NewContexts";
 import axios from "axios";
 import { Link } from "react-router";
 import ErrorCard from "./ErrorCard";
+import Register from "./Auth Pages/Register";
 
 // const products = [
 //   {
@@ -80,13 +78,13 @@ export default function Home({ theme }) {
   return (
     <div className={`relative ${!theme ? "bg-white" : "bg-black"}`}>
       <div
-        className={`absolute z-50 backdrop-blur-[5px] w-full h-[80vh] flex justify-center items-center transition-all ease-in-out duration-700 ${boolVal.authCard ? `visible translate-y-0` : ` invisible -translate-y-200`}`}
+        className={`absolute z-50 backdrop-blur-[5px] w-full h-[80vh] flex justify-center items-center transition-all ease-in-out duration-700 ${boolVal.authCard ? `visible translate-y-0` : ` invisible -translate-y-200`}}`}
       >
-        <Login />
-        <Register />
+        <Login theme={theme}/>
+        <Register theme={theme}/>
         {/* <Button className="bg-red-800 h-full w-[10%]"> */}
         <X
-          className={`absolute cursor-pointer w-[7%] h-[7%] top-10 right-40 hover:-rotate-180 duration-600 `}
+          className={`absolute cursor-pointer w-[7%] h-[7%] top-10 right-40 hover:-rotate-180 duration-600 ${theme ? "text-white": "text-black"} `}
           onClick={() => setBoolVal((prev) => ({ ...prev, authCard: false }))}
         />
         {/* </Button> */}
