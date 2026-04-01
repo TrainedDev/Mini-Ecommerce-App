@@ -78,7 +78,7 @@ export default function Home({ theme }) {
   return (
     <div className={`relative ${!theme ? "bg-white" : "bg-black"}`}>
       <div
-        className={`absolute z-50 backdrop-blur-[5px] w-full h-[80vh] flex justify-center items-center transition-all ease-in-out duration-700 ${boolVal.authCard ? `visible translate-y-0` : ` invisible -translate-y-200`}}`}
+        className={`absolute z-50 backdrop-blur-[5px] w-full h-[80vh] flex justify-center items-center transition-all ease-in-out duration-700 ${boolVal.authCard ? `visible translate-y-0` : ` hidden -translate-y-200`}}`}
       >
         <Login theme={theme}/>
         <Register theme={theme}/>
