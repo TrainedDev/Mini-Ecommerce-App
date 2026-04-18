@@ -116,10 +116,8 @@ export default function Home({ theme }) {
                 >
                   <div>
                     <h3 className="text-sm mr-2 text-start">
-                      {/* <a href={product.href}> */}
                       <span aria-hidden="true" className="absolute inset-0" />
                       {product.title}
-                      {/* </a> */}
                     </h3>
                     {/* <p className="mt-1 text-sm">{product.rating.rate}</p> */}
                   </div>
